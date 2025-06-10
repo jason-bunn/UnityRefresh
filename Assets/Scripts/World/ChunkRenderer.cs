@@ -107,12 +107,8 @@ public class ChunkRenderer : MonoBehaviour
             vertStart, vertStart + 2, vertStart + 3
         });
         var block = chunk.blocks[(int)pos.x, (int)pos.y, (int)pos.z];
-        var numericsUVs = BlockUVs.GetUVs(block, dir);
-        var unityUVs = new Vector2[numericsUVs.Length];
-        for (int i = 0; i < numericsUVs.Length; i++)
-        {
-            unityUVs[i] = new Vector2(numericsUVs[i].X, numericsUVs[i].Y);
-        }
+        var unityUVs = BlockUVRegistry.GetUVs(block, dir);
+ 
         uvs.AddRange(unityUVs);
     }
 
