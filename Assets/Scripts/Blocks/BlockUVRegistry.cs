@@ -31,6 +31,18 @@ public static class BlockUVRegistry
             for (int i = 0; i < 6; i++)
                 data.SetFaceUV(i, 3, 0);
         });
+
+        RegisterBlockType(BlockType.Water, data =>
+        {
+            data.SetAnimatedFaceUV(0, new List<Vector2Int> { new Vector2Int(4, 0), new Vector2Int(5, 0) }, 0.5f); // Back
+            data.SetAnimatedFaceUV(1, new List<Vector2Int> { new Vector2Int(4, 0), new Vector2Int(5, 0) }, 0.5f); // Front
+
+            // Animate all 6 faces
+            for (int face = 0; face < 6; face++)
+            {
+                data.SetAnimatedFaceUV(face, new List<Vector2Int> { new Vector2Int(4, 0), new Vector2Int(5, 0) }, 0.5f);
+            }
+        });
         // Add more block types as needed
     }
     public static void RegisterBlockType(BlockType type, System.Action<BlockTypeData> configure)
