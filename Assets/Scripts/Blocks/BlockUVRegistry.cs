@@ -1,25 +1,30 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Data.Common;
 using UnityEngine;
 
 public static class BlockUVRegistry
 {
-    public static readonly Dictionary<BlockType, BlockTypeData> BlockTypes = new Dictionary<BlockType, BlockTypeData>();
-    public static int AtlasSizeInTiles = 16; // Assuming a 16x16 texture atlas
-    public static int AtlasPixelSize = 256; // Assuming the atlas is 256x256 pixels
+    public static readonly Dictionary<BlockType, BlockTypeData> BlockTypes = new();
+    public static int AtlasSizeInTiles = 16;
+    public static int AtlasPixelSize = 256;
 
     static BlockUVRegistry()
     {
+
+    }
+
+    public static void RegisterDefaultBlocks()
+    {
+        Debug.Log("Initializing Block UV Registry...");
         RegisterBlockType(BlockType.Grass, data =>
         {
-            data.SetFaceUV(0, 1, 0); // Back
-            data.SetFaceUV(1, 1, 0); // Front
-            data.SetFaceUV(2, 1, 0); // Left
-            data.SetFaceUV(3, 1, 0); // Right
+            data.SetFaceUV(0, 1, 0);
+            data.SetFaceUV(1, 1, 0);
+            data.SetFaceUV(2, 1, 0); // North
+            data.SetFaceUV(3, 1, 0); // South   
             data.SetFaceUV(4, 0, 0); // Top
             data.SetFaceUV(5, 2, 0); // Bottom
         });
+
         RegisterBlockType(BlockType.Dirt, data =>
         {
             for (int i = 0; i < 6; i++)
@@ -34,17 +39,12 @@ public static class BlockUVRegistry
 
         RegisterBlockType(BlockType.Water, data =>
         {
-            data.SetAnimatedFaceUV(0, new List<Vector2Int> { new Vector2Int(4, 0), new Vector2Int(5, 0) }, 0.5f); // Back
-            data.SetAnimatedFaceUV(1, new List<Vector2Int> { new Vector2Int(4, 0), new Vector2Int(5, 0) }, 0.5f); // Front
-
-            // Animate all 6 faces
-            for (int face = 0; face < 6; face++)
-            {
-                data.SetAnimatedFaceUV(face, new List<Vector2Int> { new Vector2Int(4, 0), new Vector2Int(5, 0) }, 0.5f);
-            }
+            var animFrames = new List<Vector2Int> { new Vector2Int(3, 0), new Vector2Int(4, 0) };
+            for (int i = 0; i < 6; i++)
+                data.SetAnimatedFaceUV(i, animFrames, 0.5f); // 0.5s per frame
         });
-        // Add more block types as needed
     }
+
     public static void RegisterBlockType(BlockType type, System.Action<BlockTypeData> configure)
     {
         if (!BlockTypes.ContainsKey(type))
@@ -57,11 +57,20 @@ public static class BlockUVRegistry
 
     public static Vector2[] GetUVs(BlockType type, int faceIndex)
     {
-        if (!BlockTypes.ContainsKey(type))
+        if (!BlockTypes.TryGetValue(type, out var data))
         {
-            Debug.LogWarning($"Block type {type} not registered. Defaulting to (0, 0).");
-            return BlockTypes[BlockType.Grass].GetUVs(faceIndex, AtlasSizeInTiles, AtlasPixelSize); // fallback
+            Debug.LogWarning($"Block type {type} not registered. Defaulting to Grass.");
+            data = BlockTypes[BlockType.Grass];
         }
-        return BlockTypes[type].GetUVs(faceIndex, AtlasSizeInTiles, AtlasPixelSize);
+        return data.GetUVs(faceIndex, AtlasSizeInTiles, AtlasPixelSize);
+    }
+
+    public static Vector4 GetAnimatedUVData(BlockType type, int faceIndex)
+    {
+        if (!BlockTypes.TryGetValue(type, out var data))
+        {
+            data = BlockTypes[BlockType.Grass]; // Fallback
+        }
+        return data.GetAnimationData(faceIndex, AtlasSizeInTiles);
     }
 }
